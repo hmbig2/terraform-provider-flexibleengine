@@ -25,6 +25,10 @@ resource "flexibleengine_dli_queue" "queue" {
 
 The following arguments are supported:
 
+* `region` - (Optional, String, ForceNew) Specifies the region in which to create the dli queue resource.
+  If omitted, the provider-level region will be used.
+  Changing this will create a new VPC channel resource.
+
 * `cu_count` - (Required, Int, ForceNew) Minimum number of CUs that are bound to a queue. The value can be 16,
   64, or 256. Changing this parameter will create a new resource.
 

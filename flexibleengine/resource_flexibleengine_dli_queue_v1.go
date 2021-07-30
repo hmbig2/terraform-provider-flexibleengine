@@ -14,6 +14,9 @@ import (
 
 var regexp4Name = regexp.MustCompile(`^[a-z0-9_]{1,128}$`)
 
+const CU_16, CU_64, CU_256 = 16, 64, 256
+const RESOURCE_MODE_SHARED, RESOURCE_MODE_EXCLUSIVE = 0, 1
+
 func ResourceDliQueueV1() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDliQueueCreate,
@@ -21,6 +24,13 @@ func ResourceDliQueueV1() *schema.Resource {
 		Delete: resourceDliQueueV1Delete,
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -52,14 +62,14 @@ func ResourceDliQueueV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.IntInSlice([]int{16, 64, 256}),
+				ValidateFunc: validation.IntInSlice([]int{CU_16, CU_64, CU_256}),
 			},
 
 			"resource_mode": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.IntInSlice([]int{0, 1}),
+				ValidateFunc: validation.IntInSlice([]int{RESOURCE_MODE_SHARED, RESOURCE_MODE_EXCLUSIVE}),
 			},
 
 			"tags": {

@@ -38,9 +38,9 @@ resource flexibleengine_dli_queue "test" {
     name             =  "%s"
     cu_count         =   16
     resource_mode    =   0
-    tags             = {
-        k1    =    "1"
-    }
+	tags             = {
+		k1    =    "1"
+	}
 }`, rName)
 }
 
