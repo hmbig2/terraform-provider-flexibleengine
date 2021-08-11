@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares"
 )
@@ -224,7 +224,6 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 	d.Set("share_proto", n.ShareProto)
 	d.Set("size", n.Size)
 	d.Set("description", n.Description)
-	d.Set("share_type", n.ShareType)
 	d.Set("volume_type", n.VolumeType)
 	d.Set("is_public", n.IsPublic)
 	d.Set("availability_zone", n.AvailabilityZone)

@@ -1,22 +1,26 @@
 package flexibleengine
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/huaweicloud/terraform-provider-huaweicloud/huaweicloud/helper/mutexkv"
 )
 
-const defaultCloud string = "prod-cloud-ocb.orange-business.com"
+const (
+	defaultCloud     = "prod-cloud-ocb.orange-business.com"
+	terraformVersion = "0.12+compatible"
+)
 
 // This is a global MutexKV for use within this plugin.
 var osMutexKV = mutexkv.NewMutexKV()
 
 // Provider returns a schema.Provider for FlexibleEngine.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -348,16 +352,8 @@ func Provider() terraform.ResourceProvider {
 			// Deprecated resource
 			"flexibleengine_rds_instance_v1": resourceRdsInstance(),
 		},
-	}
-
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-		return configureProvider(d, terraformVersion)
+		// configuring the provider
+		ConfigureContextFunc: configureProvider,
 	}
 
 	return provider
@@ -411,7 +407,7 @@ func init() {
 	}
 }
 
-func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func configureProvider(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
 		EndpointType:  d.Get("endpoint_type").(string),
 		SecurityToken: d.Get("security_token").(string),
@@ -449,11 +445,12 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	config.ClientKeyFile = d.Get("key").(string)
 	config.TerraformVersion = terraformVersion
 	config.Cloud = defaultCloud
+	config.RegionClient = true
 	config.RegionProjectIDMap = make(map[string]string)
 	config.RPLock = new(sync.Mutex)
 
 	if err := config.LoadAndValidate(); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil
